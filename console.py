@@ -2,6 +2,7 @@
 """ Console Module """
 import cmd
 import sys
+import uuid
 from models.base_model import BaseModel
 from models.__init__ import storage
 from models.user import User
@@ -15,8 +16,8 @@ from models.review import Review
 class HBNBCommand(cmd.Cmd):
     """ Contains the functionality for the HBNB console"""
 
-    # determines prompt for interactive/non-interactive modes
-    prompt = '(hbnb) ' if sys.__stdin__.isatty() else ''
+    # determines prompt for interactive/non-interactive
+    prompt = '(hbnb) ' # This should be a string
 
     classes = {
                'BaseModel': BaseModel, 'User': User, 'Place': Place,
@@ -73,7 +74,7 @@ class HBNBCommand(cmd.Cmd):
                 pline = pline[2].strip()  # pline is now str
                 if pline:
                     # check for *args or **kwargs
-                    if pline[0] is '{' and pline[-1] is'}'\
+                    if pline[0] == '{' and pline[-1] == '}'\
                             and type(eval(pline)) is dict:
                         _args = pline
                     else:
@@ -114,17 +115,51 @@ class HBNBCommand(cmd.Cmd):
         pass
 
     def do_create(self, args):
-        """ Create an object of any class"""
+        """ Create an object of any class with given parameters """
         if not args:
             print("** class name missing **")
             return
-        elif args not in HBNBCommand.classes:
+
+        args_list = args.split()
+        class_name = args_list[0]
+        if class_name not in HBNBCommand.classes:
             print("** class doesn't exist **")
             return
-        new_instance = HBNBCommand.classes[args]()
-        storage.save()
-        print(new_instance.id)
-        storage.save()
+
+        # Extract parameters after the class name
+        params = args_list[1:]
+        obj_kwargs = {}
+        for param in params:
+            key_value = param.split('=')
+            if len(key_value) != 2:
+                continue  # Skip incorrectly formatted parameters
+
+            key, value = key_value[0], key_value[1]
+            if not value:
+                continue  # Skip empty values
+
+            # Processing values based on the specified type format
+            if value[0] == '"' and value[-1] == '"':
+                # String value
+                obj_kwargs[key] = value[1:-1].replace('_', ' ')
+            elif '.' in value:
+                # Float value
+                try:
+                    obj_kwargs[key] = float(value)
+                except ValueError:
+                    pass  # Skip invalid float values
+            else:
+                # Integer value
+                try:
+                    obj_kwargs[key] = int(value)
+                except ValueError:
+                    pass  # Skip invalid integer values
+
+    # Create the object instance with the parsed parameters
+    new_instance = HBNBCommand.classes[class_name](**obj_kwargs)
+    new_instance.save()
+    print(new_instance.id)
+
 
     def help_create(self):
         """ Help information for the create method """
@@ -272,7 +307,7 @@ class HBNBCommand(cmd.Cmd):
                 args.append(v)
         else:  # isolate args
             args = args[2]
-            if args and args[0] is '\"':  # check for quoted arg
+            if args and args[0] == '\"':  # check for quoted arg
                 second_quote = args.find('\"', 1)
                 att_name = args[1:second_quote]
                 args = args[second_quote + 1:]
@@ -280,10 +315,10 @@ class HBNBCommand(cmd.Cmd):
             args = args.partition(' ')
 
             # if att_name was not quoted arg
-            if not att_name and args[0] is not ' ':
+            if not att_name and args[0] != ' ':
                 att_name = args[0]
             # check for quoted val arg
-            if args[2] and args[2][0] is '\"':
+            if args[2] and args[2][0] == '\"':
                 att_val = args[2][1:args[2].find('\"', 1)]
 
             # if att_val was not quoted arg
