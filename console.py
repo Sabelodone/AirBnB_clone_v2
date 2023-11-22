@@ -114,11 +114,53 @@ class HBNBCommand(cmd.Cmd):
         """ Overrides the emptyline method of CMD """
         pass
 
-    def do_create(self, args):
-        """ Create an object of any class with given parameters """
-        if not args:
-            print("** class name missing **")
-            return
+    # ... (previous code) ...
+
+def do_create(self, args):
+    """ Create an object of any class with given parameters """
+    if not args:
+        print("** class name missing **")
+        return
+
+    args_list = args.split()
+    class_name = args_list[0]
+    if class_name not in HBNBCommand.classes:
+        print("** class doesn't exist **")
+        return
+
+    # Extract parameters after the class name
+    params = args_list[1:]
+    obj_kwargs = {}
+    for param in params:
+        key_value = param.split('=')
+        if len(key_value) != 2:
+            continue  # Skip incorrectly formatted parameters
+
+        key, value = key_value[0], key_value[1]
+        if not value:
+            continue  # Skip empty values
+
+        # Processing values based on the specified type format
+        if value[0] == '"' and value[-1] == '"':
+            # String value
+            obj_kwargs[key] = value[1:-1].replace('_', ' ')
+        elif '.' in value:
+            # Float value
+            try:
+                obj_kwargs[key] = float(value)
+            except ValueError:
+                pass  # Skip invalid float values
+        else:
+            # Integer value
+            try:
+                obj_kwargs[key] = int(value)
+            except ValueError:
+                pass  # Skip invalid integer values
+
+        # Create the object instance with the parsed parameters
+        new_instance = HBNBCommand.classes[class_name](**obj_kwargs)
+        new_instance.save()
+        print(new_instance.id)
 
         args_list = args.split()
         class_name = args_list[0]
