@@ -15,13 +15,6 @@ class FileStorage:
     __file_path = 'file.json'
     __objects = {}
 
-    def delete(self, obj=None):
-        """Delete obj from __objects if it exists."""
-        if obj:
-            key = f"{type(obj).__name__}.{obj.id}"
-            if key in self.__objects:
-                del self.__objects[key]
-
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage.
 
@@ -81,4 +74,20 @@ class FileStorage:
             pass
         except json.decoder.JSONDecodeError:
             # Handle JSON decode error
+            pass
+
+    def delete(self, obj=None):
+        """
+         Delete obj from __objects if it’s inside - if obj is equal to None,
+           the method should not do anything
+        """
+        if obj is None:
+            return
+        obj_to_del = f"{obj.__class__.__name__}.{obj.id}"
+
+        try:
+            del FileStorage.__objects[obj_to_del]
+        except AttributeError:
+            pass
+        except KeyboardInterrupt:
             pass
