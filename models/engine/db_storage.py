@@ -14,10 +14,9 @@ from models.review import Review
 from models.state import State
 from models.user import User
 
-
 class DBStorage:
     """
-    
+    Handles the details of how to connect to the database and execute SQL commands
     """
     __engine = None
     __session = None
@@ -35,7 +34,7 @@ class DBStorage:
 
     def all(self, cls=None):
         """
-        
+        Retrieves all objects of a given class or all objects if no class is specified.
         """
         objs_list = []
         if cls:
@@ -57,27 +56,27 @@ class DBStorage:
 
     def new(self, obj):
         """
-        
+        Adds a new object to the current database session.
         """
         self.__session.add(obj)
         self.__session.commit()
 
     def save(self):
-        """"
-        
+        """
+        Commits all changes to the current database session.
         """
         self.__session.commit()
 
     def delete(self, obj=None):
         """
-        
+        Deletes an object from the current database session if provided.
         """
         if obj:
             self.__session.delete(obj)
 
     def reload(self):
         """
-        
+        Creates all tables in the database and sets up the current database session.
         """
         Base.metadata.drop_all(self.__engine)
         Base.metadata.create_all(self.__engine)
@@ -86,5 +85,9 @@ class DBStorage:
         self.__session = Session()
 
     def close(self):
-        """call remove() method on the private session attribute"""
-        self.__session.remove()
+        """
+        Closes the current database session.
+        """
+        if self.__session:
+            self.__session.close()
+
