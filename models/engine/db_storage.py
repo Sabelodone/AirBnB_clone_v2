@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 """
-
+handles the details of how to connect to the database and execute SQL commands
 """
-# handles the details of how to connect to the database and execute SQL commands
 from sqlalchemy import create_engine
 from os import getenv
 from sqlalchemy.orm import scoped_session, sessionmaker, Session
@@ -22,15 +21,13 @@ class DBStorage:
     """
     __engine = None
     __session = None
+
     def __init__(self) -> None:
         username = getenv("HBNB_MYSQL_USER")
         password = getenv("HBNB_MYSQL_PWD")
         host = getenv("HBNB_MYSQL_HOST")
         database_name = getenv("HBNB_MYSQL_DB")
-        database_url = "mysql+mysqldb://{}:{}@{}/{}".format(username,
-                                                            password,
-                                                            host,
-                                                            database_name)
+        database_url = "mysql+mysqldb://{}:{}@{}/{}".format(username, host, database_name)
         self.__engine = create_engine(database_url, pool_pre_ping=True)
 
         if getenv("HBNB_ENV") == "test":
@@ -57,7 +54,7 @@ class DBStorage:
             key = "{}.{}".format(obj.__class__.__name__, obj.id)
             obj_dict[key] = obj
         return obj_dict
-    
+
     def new(self, obj):
         """
         
@@ -69,9 +66,8 @@ class DBStorage:
         """"
         
         """
-        self.__session.commit()    
+        self.__session.commit()
 
-                
     def delete(self, obj=None):
         """
         
@@ -90,6 +86,5 @@ class DBStorage:
         self.__session = Session()
 
     def close(self):
-        """Close the working SQLAlchemy session."""
-        self.__session.close()
-
+        """call remove() method on the private session attribute"""
+        self.__session.remove()

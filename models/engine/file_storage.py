@@ -17,11 +17,11 @@ class FileStorage:
 
     def all(self, cls=None):
         """Returns a dictionary of models currently in storage.
-
+        
         Args:
             cls (class, optional): If specified, filters the result to include
                 only objects of the specified class.
-
+        
         Returns:
             dict: A dictionary containing objects in storage.
         """
@@ -29,8 +29,7 @@ class FileStorage:
             if isinstance(cls, str):
                 cls = globals().get(cls)
             if cls and issubclass(cls, BaseModel):
-                cls_dict = {k: v for k,
-                            v in self.__objects.items() if isinstance(v, cls)}
+                cls_dict = {k: v for k, v in self.__objects.items() if isinstance(v, cls)}
                 return cls_dict
         return FileStorage.__objects
 
@@ -50,10 +49,10 @@ class FileStorage:
     def reload(self):
         """Loads storage dictionary from file."""
         classes = {
-                    'BaseModel': BaseModel, 'User': User, 'Place': Place,
-                    'State': State, 'City': City, 'Amenity': Amenity,
-                    'Review': Review
-                  }
+            'BaseModel': BaseModel, 'User': User, 'Place': Place,
+            'State': State, 'City': City, 'Amenity': Amenity,
+            'Review': Review
+        }
         try:
             temp = {}
             with open(FileStorage.__file_path, 'r') as f:
@@ -78,13 +77,12 @@ class FileStorage:
 
     def delete(self, obj=None):
         """
-         Delete obj from __objects if it’s inside - if obj is equal to None,
-           the method should not do anything
+        Delete obj from __objects if it’s inside - if obj is equal to None,
+        the method should not do anything
         """
         if obj is None:
             return
         obj_to_del = f"{obj.__class__.__name__}.{obj.id}"
-
         try:
             del FileStorage.__objects[obj_to_del]
         except AttributeError:
@@ -93,5 +91,5 @@ class FileStorage:
             pass
 
     def close(self):
-        """Call the reload method."""
+        """Call reload() method for deserializing the JSON file to objects"""
         self.reload()
